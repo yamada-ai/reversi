@@ -5,8 +5,8 @@ class Board:
         # cell配列を初期化
         self.cells = self.ini_cell(size)
         # ボード上のどこかに黒を置けるかどうか
-        self.canBlackPlace = None
-        self.canWhitePlace = None
+        self.canBlackPlace = False
+        self.canWhitePlace = False
         self.size = size
     
     # コピーコンストラクタは copy で挑戦
@@ -33,14 +33,28 @@ class Board:
                         num += 1
         return num
     
-    # 指定した色はどこかに置ける場所があるか返す
-    # def canPlace(self, isBlack):
-
-
 
     # 指定のセルに指定の色をおけるか返す
-    # def canPlace(self, row, column, isBlack):
+    def canPlace(self, row, column, isBlack):
+        Y = [-1,-1,-1,0,1,1,1,0]
+        X = [-1,0,1,1,1,0,-1,-1]
 
+        # 埋まっていたら置けない
+        if(not self.isBlank(row, column)):
+            return False
+        for k in range(8): 
+            if(self.canFlip(row, column, X[k], Y[k], isBlack)):
+                return True
+        return False
+    
+    # 指定した色はどこかに置ける場所があるか返す
+    def existCanPlace(self, isBlack):
+        for i in range(self.size):
+            for j in range(self.size):
+                if(self.canPlace(i, j, isBlack)):
+                   return True
+        return False
+        
 
     # 指定のセルが黒かどうか返す．セルが空白の場合は常にfalseを返す
     def isBlack(self, row, column):
@@ -54,10 +68,15 @@ class Board:
 
     # 指定のセルが空いているか返す
     def isBlank(self, row, column):
-        return self.cell[row][column].isBlank
+        return self.cells[row][column].isBlank
     
     # 指定のセルに指定の色を置く．おいた後にreverseメソッドを用いて挟まれたピースを裏返し，その後，calcConditionメソッドで盤面の再計算をする
     def set(self, row, column, isBlack):
+         self.cells[row][column].set(isBlack)
+        #  print(self.isBlank(row,column))
+        #  print(self.isBlack(row,column))
+         self.reverse(row, column, isBlack)
+         self.calcCondition()
 
     # 指定のセルに置かれたピースの周辺8方向について挟まれているか確認し，挟まれたピースを裏返す．
     # 挟めるかどうかの確認にはcanFlipメソッドを用いる．
@@ -65,6 +84,14 @@ class Board:
         Y = [-1,-1,-1,0,1,1,1,0]
         X = [-1,0,1,1,1,0,-1,-1]
         
+        for k in range(8):
+            rev_num = self.canFlip(row, column, X[k], Y[k], isBlack)
+            if(rev_num):
+                # 返り値だけひっくり返す
+                for n in range(1, rev_num[0]):
+                    self.cells[row+ n*Y[k]][column+ n*X[k]].isBlack = isBlack
+        
+
 
     
     # ボード上の全てのセルについて，黒と白それぞれがおけるかどうか計算し，cellsプロパティとcanBlackPlaceプロパティ，canWhitePlaceプロパティを更新する．
@@ -110,6 +137,20 @@ class Board:
             else:
                 return False
 
+
+    def getEValue(self,row, column, isBlack):
+        if isBlack:
+            return self.cells[row][column].eValueBlack
+        else:
+            return self.cells[row][column].eValueWhite
+    
+    def setEValue(self, row, column, isBlack, eValue):
+        if isBlack:
+            self.cells[row][column].eValueBlack = eValue
+        else:
+            self.cells[row][column].eValueWhite = eValue
+
+
     def icon(self):
         icon = []
         #  = self.state
@@ -117,10 +158,10 @@ class Board:
             icon_list = []
             for x in range(self.size):
                 # 白
-                if( (not self.cells[y][x].isBlank) and (self.cells[y][x].isBlack and False )):
+                if( not self.isBlank(y,x) and not self.isBlack(y,x)):
                     icon_list.append("●")
                 # 黒にしたかった
-                elif (not self.cells[y][x].isBlank) and (self.cells[y][x].isBlack):
+                elif( (self.cells[y][x].isBlank == False) and (self.cells[y][x].isBlack) ):
                     icon_list.append("o")
                 else:
                     icon_list.append(" ")
@@ -139,5 +180,10 @@ class Board:
         
 
 b = Board(8)
-px = b.cells[7][7].row
-print(px)
+b.set(3,3, True)
+b.set(4,4, True)
+b.set(4,3, False)
+b.set(3,4, False)
+b.icon()
+b.set(5,3, True)
+b.icon()
