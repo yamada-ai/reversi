@@ -17,3 +17,4 @@ class Cell:
     
     def set(self, isBlack):
         self.isBlack = isBlack
+        self.isBlank = False
