@@ -178,12 +178,12 @@ class Board:
 
     
         
-
-b = Board(8)
-b.set(3,3, True)
-b.set(4,4, True)
-b.set(4,3, False)
-b.set(3,4, False)
-b.icon()
-b.set(5,3, True)
-b.icon()
+if __name__ == '__main__':
+    b = Board(8)
+    b.set(3,3, True)
+    b.set(4,4, True)
+    b.set(4,3, False)
+    b.set(3,4, False)
+    b.icon()
+    b.set(5,3, True)
+    b.icon()
