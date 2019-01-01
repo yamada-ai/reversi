@@ -9,6 +9,10 @@ class Frame(tk.Frame):
         self.pack()
         self.form = MainForm(self)
 
+    def close_frame(self):
+        self.form.close()
+        self.master.destroy()
+
 
 class MainForm(tk.Canvas):
     size = 8
@@ -23,6 +27,7 @@ class MainForm(tk.Canvas):
 
         self.controller = GameController(self, self.size, BasicAI(), BasicAI())
         self.controller.play()
+        self.bind("<Button-1>", lambda e: self.controller.turn_manual())
 
     def refresh(self, board):
         for i in range(self.size):
@@ -44,10 +49,14 @@ class MainForm(tk.Canvas):
                     y = j * self.cell_size + self.margin + self.cell_size/2
                     self.create_text(x, y, text=str(board.getEValue(j, i, isBlack)), justify="center")
 
+    def close(self):
+        self.controller.end()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("othello")
     root.geometry("500x500")
     frame = Frame(master=root)
+    root.protocol('WM_DELETE_WINDOW', frame.close_frame)
     frame.mainloop()
