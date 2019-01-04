@@ -2,8 +2,10 @@ from board import Board
 import concurrent.futures
 import time
 
-
+TIME = 0
+# executor = None
 class GameController:
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
     def __init__(self, form, size, ai1, ai2):
         self.board = Board(size)
         self.board.set(3, 3, True)
@@ -15,42 +17,34 @@ class GameController:
         self.ai2 = ai2
         self.form = form
         self.previousMove = None
-        self.flag = True
+        self.is_end = False
 
     def play(self):
-        self.isPlay = True
         self.form.refresh_color(self.board, True)
-        
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-        executor.submit(self.turn)
+        # executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        self.executor.submit(self.turn)
 
-    def turn_manual(self):
-        if self.flag:
-            self.previousMove = self.ai1.nextHand(self.board, self.previousMove, True)
-            if self.previousMove is not None:
-                self.board.set(self.previousMove.row, self.previousMove.column, True)
-            self.flag = False
-        else:
-            self.previousMove = self.ai2.nextHand(self.board, self.previousMove, False)
-            if self.previousMove is not None:
-                self.board.set(self.previousMove.row, self.previousMove.column, False)
-            self.flag = True
-        self.form.refresh_color(self.board, self.flag)
+
+    def end(self):
+        print("end")
+        self.executor.shutdown()
+
 
     def turn(self):
-        while self.isPlay:
-            time.sleep(1)
+        global TIME
+        q = 0
+        while not self.is_end:
+            print(q)
+            time.sleep(TIME)
             self.previousMove = self.ai1.nextHand(self.board, self.previousMove, True)
             if self.previousMove is not None:
                 self.board.set(self.previousMove.row, self.previousMove.column, True)
             self.form.refresh_color(self.board, False)
-            time.sleep(1)
+            time.sleep(TIME)
             self.previousMove = self.ai2.nextHand(self.board, self.previousMove, False)
             if self.previousMove is not None:
                 self.board.set(self.previousMove.row, self.previousMove.column, False)
 
             self.form.refresh_color(self.board, True)
-
-    def end(self):
-        self.isPlay = False
+            q += 1
 
