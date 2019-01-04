@@ -28,7 +28,7 @@ class GameController:
     def end(self):
         print("end")
         self.executor.shutdown()
-        
+
 
     def turn(self):
         global TIME
@@ -47,3 +47,4 @@ class GameController:
 
             self.form.refresh_color(self.board, True)
             q += 1
+
