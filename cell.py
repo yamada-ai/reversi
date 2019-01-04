@@ -5,7 +5,7 @@ class Cell:
          # true : 空白
         self.isBlank = True
         # true : 黒
-        self.isBlack = None
+        self.isBlack = False
         # true : 置ける
         self.canBlackPlace = False
         self.canWhitePlace = False
@@ -16,4 +16,5 @@ class Cell:
     # コピーコンストラクタは copy で挑戦
     
     def set(self, isBlack):
+        self.isBlank = False
         self.isBlack = isBlack

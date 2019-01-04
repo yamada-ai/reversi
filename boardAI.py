@@ -1,6 +1,6 @@
 import cell
 
-class Board:
+class Board(object):
     def __init__(self, size):
         # cell配列を初期化
         self.cells = self.ini_cell(size)
@@ -9,10 +9,25 @@ class Board:
         self.canWhitePlace = True
         self.size = size
 
-
+        # 追加フィールド
+        self.is_end = False
+        self.pas = 0
     
     # コピーコンストラクタは copy で挑戦
+    
 
+    # リセット
+    def reset(self):
+        self.cells = self.ini_cell(self.size)
+        # ボード上のどこかに黒を置けるかどうか
+        self.canBlackPlace = True
+        self.canWhitePlace = True
+        # self.size = size
+
+        # 追加フィールド
+        self.is_end = False
+        self.pas = 0
+    
     # cellsの初期化
     def ini_cell(self, size):
         cells = []
@@ -24,6 +39,12 @@ class Board:
             cells_line = []
         return cells
     
+    
+    def end_check(self):
+        # 全てのマスが埋まるもしくはパス2回
+        if (self.getPieceNum(True) + self.getPieceNum(False) == self.size * self.size) or self.pas == 2:
+            self.is_end = True 
+
     # ボード上にある指定した色の個数を取得 
     def getPieceNum(self, isBlack):
         num = 0
@@ -31,7 +52,7 @@ class Board:
             for j in range(self.size):
                 # 空白ではない
                 if self.cells[i][j].isBlank == False:
-                    if self.cells[i][j].isBlank == isBlack:
+                    if self.cells[i][j].isBlack == isBlack:
                         num += 1
         return num
     
@@ -74,11 +95,15 @@ class Board:
     
     # 指定のセルに指定の色を置く．おいた後にreverseメソッドを用いて挟まれたピースを裏返し，その後，calcConditionメソッドで盤面の再計算をする
     def set(self, row, column, isBlack):
-    
+        if row < 0 or column < 0:
+            self.pas += 1
+            return
+
         self.cells[row][column].set(isBlack)
         #  print(self.isBlank(row,column))
         #  print(self.isBlack(row,column))
         self.reverse(row, column, isBlack)
+        self.pas = 0
         self.calcCondition()
 
     # 指定のセルに置かれたピースの周辺8方向について挟まれているか確認し，挟まれたピースを裏返す．
@@ -98,7 +123,19 @@ class Board:
 
     
     # ボード上の全てのセルについて，黒と白それぞれがおけるかどうか計算し，cellsプロパティとcanBlackPlaceプロパティ，canWhitePlaceプロパティを更新する．
+
+    # 全て false にしてから処理する
+    def canplace_init(self):
+        self.canBlackPlace = False
+        self.canWhitePlace = False
+        for i in range(self.size):
+            for j in range(self.size):
+                self.cells[i][j].canBlackPlace = False
+                self.cells[i][j].canWhitePlace = False
+
+    
     def calcCondition(self):
+        self.canplace_init()
         Y = [-1,-1,-1,0,1,1,1,0]
         X = [-1,0,1,1,1,0,-1,-1]
         for i in range(self.size):
@@ -109,13 +146,17 @@ class Board:
                 # もし1方向でもひっくり返すことが出来ればtrueにする
                 # 黒
                 for k in range(8):
-                    if(self.canFlip(i, j, X[k], Y[k], True) ):
+                    if self.canFlip(i, j, X[k], Y[k], True):
                         self.cells[i][j].canBlackPlace = True
+                        self.canBlackPlace = True
                         break
+                    
+
                 # 白
                 for k in range(8):
-                    if(self.canFlip(i, j, X[k], Y[k], False) ):
+                    if self.canFlip(i, j, X[k], Y[k], False) :
                         self.cells[i][j].canWhitePlace = True
+                        self.canWhitePlace = True
                         break
                 
 
